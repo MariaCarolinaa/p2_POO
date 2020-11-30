@@ -5,6 +5,11 @@
  */
 package disciplina;
 
+import db.Listener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
@@ -12,14 +17,27 @@ import java.util.ArrayList;
  * @author maria
  */
 public class Disciplina {
+    private int id;
     private String nome, ementa;
     private int ciclo;
-    private double nota;
+    private int nota;
 
-    public Disciplina(String nome, String ementa, int ciclo) {
+    
+
+    public Disciplina(int id, String nome, String ementa, int ciclo, int nota) {
+        this.id = id;
         this.nome = nome;
         this.ementa = ementa;
         this.ciclo = ciclo;
+        this.nota = nota;
+    }
+    
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
     
     public String getNome() {
@@ -46,26 +64,139 @@ public class Disciplina {
         this.ciclo = ciclo;
     }
 
-    public double getNota() {
+    public int getNota() {
         return nota;
     }
 
-    public void setNota(double nota) {
+    public void setNota(int nota) {
         this.nota = nota;
     }
 
-    public static ArrayList<Disciplina> getList() {
+    public static ArrayList<Disciplina> getList() throws Exception {
         
         ArrayList<Disciplina> disciplina = new ArrayList<>();
         
-        disciplina.add(new Disciplina ("Programação Orientada Objeto","Conceitos de orientação objeto",4));
-        disciplina.add(new Disciplina ("Gestão de Projetos","Conceito e melhores práticas de gestão de projetos",5));
-        disciplina.add(new Disciplina ("Laboratório de Banco de Dado","Implementar soluções de Banco de Dados",5));
-        disciplina.add(new Disciplina ("Laboratório de Engenharia De Software","Desenvolvimento de um software",5));
-        disciplina.add(new Disciplina ("Programação de Dispositivos Móveis","Ambiente de Programação mobile",5));
-        disciplina.add(new Disciplina ("Segurança da Informação","Requisitos de segurança",5));
-        disciplina.add(new Disciplina ("Inglês V","Aprofundamento da compreensão e produção oral",5));
-        disciplina.add(new Disciplina ("Trabalho de Graduação I","Elaborar um trabalho de graduação",5));
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet result = null;
+        
+        Exception methodException = null;
+        
+        try{
+            conn = Listener.getConnection();
+            stmt = conn.createStatement();
+            result = stmt.executeQuery("SELECT * FROM disciplina");
+            
+            while(result.next()) {
+                disciplina.add(new Disciplina(
+                        result.getInt("id"),
+                        result.getString("nome"),
+                        result.getString("ementa"),
+                        result.getInt("ciclo"),
+                        result.getInt("nota")
+                   
+                ));
+            }
+        } catch(Exception ex) {
+            methodException = ex;
+        } finally {
+            try{result.close();}catch(Exception ex1){}
+            try{stmt.close();}catch(Exception ex1){}
+            try{conn.close();}catch(Exception ex1){}
+        }
+        
+        if(methodException != null) throw methodException;
+        
         return disciplina;
+    }
+    
+    public static void insert(String nome, String ementa, int ciclo) throws Exception {
+        
+        ArrayList<Disciplina> disciplina = new ArrayList<>();
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        Exception methodException = null;
+        
+        try{
+            conn = Listener.getConnection();
+            stmt = conn.prepareStatement("INSERT INTO disciplina(nome, ementa, ciclo) values (?,?,?)");
+            
+            stmt.setString(1, nome);
+            stmt.setString(2, ementa);
+            stmt.setInt(3, ciclo);
+            
+            stmt.execute();
+            
+        } catch(Exception ex) {
+            methodException = ex;
+        } finally {
+            try{stmt.close();}catch(Exception ex1){}
+            try{conn.close();}catch(Exception ex1){}
+        }
+        
+        if(methodException != null) throw methodException;
+    }
+    
+    public static void update (int nota, int id) throws Exception {
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        Exception methodException = null;
+        
+        try{
+            conn = Listener.getConnection();
+            stmt = conn.prepareStatement("UPDATE disciplina SET nota=? WHERE id=?");
+            
+            stmt.setInt(1, nota);
+            stmt.setInt(2, id);
+            
+            stmt.execute();
+            
+        } catch(Exception ex) {
+            methodException = ex;
+        } finally {
+            try{stmt.close();}catch(Exception ex1){}
+            try{conn.close();}catch(Exception ex1){}
+        }
+        
+        if(methodException != null) throw methodException;
+    }
+    
+    public static void delete (int id) throws Exception {
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        Exception methodException = null;
+        
+        try{
+            conn = Listener.getConnection();
+            stmt = conn.prepareStatement("DELETE FROM disciplina WHERE id=?");
+            
+            stmt.setInt(1, id);
+            
+            stmt.execute();
+            
+        } catch(Exception ex) {
+            methodException = ex;
+        } finally {
+            try{stmt.close();}catch(Exception ex1){}
+            try{conn.close();}catch(Exception ex1){}
+        }
+        
+        if(methodException != null) throw methodException;
+    }
+    
+    public static String getCreateStatement(){
+        return "CREATE TABLE IF NOT EXISTS disciplina("
+                + "id INTEGER PRIMARY KEY,"
+                + "nome VARCHAR(50) NOT NULL,"
+                + "ementa VARCHAR(200) NOT NULL,"
+                + "ciclo INTEGER NOT NULL,"
+                + "nota INTEGER DEFAULT 0"
+            + ")";
     }
 }
