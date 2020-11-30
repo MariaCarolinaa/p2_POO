@@ -10,12 +10,17 @@
 
 <% 
 
-    ArrayList<Disciplina> listaDisciplina = Disciplina.getList((ArrayList<Disciplina>) application.getAttribute("disciplina"));
+    ArrayList<Disciplina> disciplina = (ArrayList<Disciplina>) application.getAttribute("disciplina");
+
+    if(disciplina == null) {
+        disciplina = Disciplina.getList();
+        application.setAttribute("disciplina", disciplina);
+    }
     
     if(request.getParameter("redefinir")!= null){
          int i = Integer.parseInt(request.getParameter("i"));
          double novaNota = Double.parseDouble(request.getParameter("novaNota"));
-         listaDisciplina.get(i).setNota(novaNota);
+         disciplina.get(i).setNota(novaNota);
          response.sendRedirect(request.getRequestURI());
      }
 
@@ -39,8 +44,8 @@
                 <th>Nota</th>
                 <th>Redefinir Nota</th>
             </tr>
-            <%for(int i=0; i<listaDisciplina.size(); i++){%>
-                <% Disciplina info = listaDisciplina.get(i); %>
+            <%for(int i=0; i<disciplina.size(); i++){%>
+                <% Disciplina info = disciplina.get(i); %>
                 <tr>
                     <td><%= info.getNome() %></td>
                     <td><%= info.getEmenta() %></td>
