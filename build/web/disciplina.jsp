@@ -9,21 +9,36 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <% 
-
-    ArrayList<Disciplina> disciplina = (ArrayList<Disciplina>) application.getAttribute("disciplina");
-
-    if(disciplina == null) {
-        disciplina = Disciplina.getList();
-        application.setAttribute("disciplina", disciplina);
-    }
+    Exception err = null;
     
-    if(request.getParameter("redefinir")!= null){
-         int i = Integer.parseInt(request.getParameter("i"));
-         double novaNota = Double.parseDouble(request.getParameter("novaNota"));
-         disciplina.get(i).setNota(novaNota);
-         response.sendRedirect(request.getRequestURI());
-     }
-
+    try{
+       if(request.getParameter("redefinir")!= null) {
+           int index = Integer.parseInt(request.getParameter("index"));
+           int nota = Integer.parseInt(request.getParameter("novaNota"));
+ 
+           Disciplina.update(nota, index);
+           response.sendRedirect(request.getRequestURI());
+          
+       }
+       
+       if(request.getParameter("insert")!=null) {
+           String nome = request.getParameter("nome");
+           String ementa = request.getParameter("ementa");
+           int ciclo = Integer.parseInt(request.getParameter("ciclo"));
+           
+           Disciplina.insert(nome, ementa, ciclo);
+           response.sendRedirect(request.getRequestURI());
+       }
+       
+       if(request.getParameter("delete")!=null){
+           int index = Integer.parseInt(request.getParameter("index"));
+           
+           Disciplina.delete(index);
+           response.sendRedirect(request.getRequestURI());
+       }
+    } catch (Exception ex) {
+        err = ex;
+    }
 %>
 
 <!DOCTYPE html>
@@ -36,6 +51,13 @@
         
         <%@include file="WEB-INF/componentes/menu.jspf" %>
         
+        <form>
+            <input type="text" placeholder="Disciplina" name="nome">
+            <input type="text" placeholder="Ementa" name="ementa">
+            <input type="text" placeholder="Ciclo" name="ciclo">
+            <input type="submit" name="insert" value="Inserir">
+        </form>
+        <br>
         <table border="1">
             <tr>
                 <th>Nome</th>
@@ -44,8 +66,8 @@
                 <th>Nota</th>
                 <th>Redefinir Nota</th>
             </tr>
-            <%for(int i=0; i<disciplina.size(); i++){%>
-                <% Disciplina info = disciplina.get(i); %>
+            <%for(int i=0; i<Disciplina.getList().size(); i++){%>
+                <% Disciplina info = Disciplina.getList().get(i); %>
                 <tr>
                     <td><%= info.getNome() %></td>
                     <td><%= info.getEmenta() %></td>
@@ -55,7 +77,7 @@
                         <form>
                             <input type="text" name="novaNota" value="">
                             <input type="submit" name="redefinir" value="Redefinir"/>
-                            <input type="hidden" name="i" value="<%= i %>"/>
+                            <input type="hidden" name="index" value="<%= info.getId() %>"/>
                         </form>
                     </td>
                 </tr>
