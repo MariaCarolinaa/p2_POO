@@ -65,6 +65,7 @@
                 <th>Ciclo</th>
                 <th>Nota</th>
                 <th>Redefinir Nota</th>
+                <th>Deletar</th>
             </tr>
             <%for(int i=0; i<Disciplina.getList().size(); i++){%>
                 <% Disciplina info = Disciplina.getList().get(i); %>
@@ -77,6 +78,12 @@
                         <form>
                             <input type="text" name="novaNota" value="">
                             <input type="submit" name="redefinir" value="Redefinir"/>
+                            <input type="hidden" name="index" value="<%= info.getId() %>"/>
+                        </form>
+                    </td>
+                    <td>
+                        <form>
+                            <input type="submit" name="delete" value="delete"/>
                             <input type="hidden" name="index" value="<%= info.getId() %>"/>
                         </form>
                     </td>
